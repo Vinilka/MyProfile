@@ -252,9 +252,11 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 var canvas = document.querySelector('canvas');
-var c = canvas.getContext('2d');
-canvas.width = 1024;
-canvas.height = 576;
+var c = canvas.getContext('2d'); //canvas.width = 1024
+//canvas.height = 576
+
+canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
 var gravity = 1;
 
 var Player = /*#__PURE__*/function () {
