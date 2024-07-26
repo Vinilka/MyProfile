@@ -273,6 +273,7 @@ var Player = /*#__PURE__*/function () {
     };
     this.width = 134;
     this.height = 150;
+    this.jumpCount = 0;
     this.image = createImage(_img_playerStandRight_png__WEBPACK_IMPORTED_MODULE_7__["default"]);
     this.frames = 0;
     this.sprites = {
@@ -486,13 +487,20 @@ function animate() {
   platforms.forEach(function (platform) {
     if (player.position.y + player.height <= platform.position.y && player.position.y + player.height + player.velocity.y >= platform.position.y && player.position.x + player.width >= platform.position.x && player.position.x <= platform.position.x + platform.width) {
       player.velocity.y = 0;
+      player.jumpCount = 0;
     }
   }); // sprite switch //
 
   if (keys.up.pressed) {
     player.frames = 1;
-    player.currentSprite = player.sprites.jump.right;
-    player.currentCropWidth = player.sprites.jump.cropWidth;
+
+    if (lastKey === 'right') {
+      player.currentSprite = player.sprites.jump.right;
+      player.currentCropWidth = player.sprites.jump.cropWidth;
+    } else if (lastKey === 'left') {
+      player.currentSprite = player.sprites.jump.left;
+      player.currentCropWidth = player.sprites.jump.cropWidth;
+    }
   } else if (keys.right.pressed && lastKey === 'right' && player.currentSprite !== player.sprites.run.right) {
     player.frames = 1;
     player.currentSprite = player.sprites.run.right;
@@ -546,9 +554,13 @@ addEventListener('keydown', function (_ref3) {
 
     case 'w':
     case 'ArrowUp':
-      keys.up.pressed = true;
-      player.velocity.y -= 20;
-      break;
+      if (player.jumpCount < 2) {
+        player.jumpCount++;
+        keys.up.pressed = true;
+        player.velocity.y -= 20;
+        break;
+      }
+
   }
 });
 addEventListener('keyup', function (_ref4) {

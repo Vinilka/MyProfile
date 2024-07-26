@@ -32,6 +32,7 @@ class Player {
     }
     this.width = 134
     this.height = 150
+    this.jumpCount = 0
 
     this.image = createImage(playerStandRight)
     this.frames = 0
@@ -272,14 +273,20 @@ function animate() {
     && player.position.x + player.width >= platform.position.x
     && player.position.x <= platform.position.x + platform.width) {
     player.velocity.y = 0
+    player.jumpCount = 0;
     }
   })
 
   // sprite switch //
   if (keys.up.pressed) {
-    player.frames = 1
-    player.currentSprite = player.sprites.jump.right
-    player.currentCropWidth = player.sprites.jump.cropWidth
+     player.frames = 1;
+    if (lastKey === 'right') {
+      player.currentSprite = player.sprites.jump.right;
+      player.currentCropWidth = player.sprites.jump.cropWidth;
+    } else if (lastKey === 'left') {
+      player.currentSprite = player.sprites.jump.left;
+      player.currentCropWidth = player.sprites.jump.cropWidth;
+    }
   } else if (
     keys.right.pressed &&
     lastKey === 'right' && player.currentSprite !== player.sprites.run.right) {
@@ -341,9 +348,12 @@ addEventListener('keydown', ({key}) => {
     
     case 'w':
     case 'ArrowUp':
-      keys.up.pressed = true
-      player.velocity.y -= 20
-      break
+      if (player.jumpCount < 2) {
+        player.jumpCount++;
+        keys.up.pressed = true
+        player.velocity.y -= 20
+        break
+      }
     
   }
 })
