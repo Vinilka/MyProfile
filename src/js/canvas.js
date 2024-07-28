@@ -1,13 +1,14 @@
+import { Player } from './Player';
+import { DialogueBubble } from './DialogueBubble';
+import { Platform } from './Platform';
+import { GenericObject } from './GenericObject';
+import { createImage } from './createImage';
+
 import platform from '../img/platform.png'
 import hills from '../img/hills.png'
 import background from '../img/background.png'
 import platformSmallTall from '../img/platformSmallTall.png'
-import playerRunLeft from '../img/playerMoveLeft.png'
-import playerRunRight from '../img/playerMoveRight.png'
-import playerStandLeft from '../img/playerStandLeft.png'
-import playerStandRight from '../img/playerStandRight.png'
-import playerJumpRight from '../img/playerJumpRight.png'
-import playerJumpLeft from '../img/playerJumpLeft.png'
+import dialogueBoxRight from '../img/dialogueBoxRight.png'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
@@ -20,132 +21,10 @@ canvas.width = window.innerWidth;
 
 const gravity = 1
 
-
-class Player {
-  constructor() {
-    this.speed = 10
-    this.position = {
-      x: 100,
-      y: 100
-    }
-    // gravity //
-    this.velocity = {       
-      x: 0, 
-      y: 1
-    }
-    this.width = 134
-    this.height = 150
-    this.jumpCount = 0
-
-    this.image = createImage(playerStandRight)
-    this.frames = 0
-    this.sprites = {
-      stand: {
-        right: createImage(playerStandRight),
-        left: createImage(playerStandLeft),
-        cropWidth: 387.375
-      },
-      run: {
-        right: createImage(playerRunRight),
-        left: createImage(playerRunLeft),
-        cropWidth: 395
-      },
-      jump: {
-        right: createImage(playerJumpRight),
-        left: createImage(playerJumpLeft),
-        cropWidth: 395
-      }
-    }
-
-    this.currentSprite = this.sprites.stand.right
-    this.currentCropWidth = this.sprites.stand.cropWidth
-  }
-
-  draw() {
-    c.drawImage(
-      this.currentSprite,
-      this.currentCropWidth * this.frames,
-      -5,
-      this.currentCropWidth, 
-      454,
-      this.position.x,
-      this.position.y,
-      this.width,
-      this.height
-    )
-  }
-
-  updatePlayerFrame() {
-    this.frames++
-    
-    if
-      (this.frames >= 16
-      && (this.currentSprite === this.sprites.stand.right || this.currentSprite === this.sprites.stand.left))
-        this.frames = 0
-    else if
-      (this.frames >= 20
-      && (this.currentSprite === this.sprites.run.right || this.currentSprite === this.sprites.run.left))
-        this.frames = 0
-      else if
-      (this.frames >= 30
-      && (this.currentSprite === this.sprites.jump.right || this.currentSprite === this.sprites.jump.left))
-        this.frames = 0
-  }
-
-  update() {
-
-    this.draw()
-    this.position.x += this.velocity.x
-    this.position.y += this.velocity.y
-
-    if (this.position.y + this.height + this.velocity.y <= canvas.height)
-      this.velocity.y += gravity
-  }
-}
-
-class Platform {
-  constructor({x,y, image}) {
-    this.position = {
-      x,
-      y
-    }
-    this.image = image
-    this.width = image.width
-    this.height = image.height
-  }
-
-  draw() {
-    c.drawImage(this.image, this.position.x,this.position.y)
-  }
-}
-
-class GenericObject {
-  constructor({x,y, image}) {
-    this.position = {
-      x,
-      y
-    }
-    this.image = image
-    this.width = image.width
-    this.height = image.height
-  }
-
-  draw() {
-    c.drawImage(this.image, this.position.x,this.position.y)
-  }
-}
-
-function createImage(imageSrc) {
-  const image = new Image()
-  image.src = imageSrc
-  return image
-}
-
-
 let platformImage = createImage(platform)
 let platformSmallTallImage = createImage(platformSmallTall)
   
-let player = new Player()
+let player = new Player({ canvas,context: c, gravity })
 let platforms = []
 
 let genericObject = []
@@ -165,47 +44,59 @@ const keys = {
 
 let scrollPlatform = 0
   
+// Create an instance of MessageBubble
+let dialogueBubble = new DialogueBubble(dialogueBoxRight, 100, 100, c);
+let messageShown = false;
+
+
 // function after dying//
 function init() {
 
   platformImage = createImage(platform)
   
-  player = new Player()
+  player = new Player({ canvas, context: c, gravity })
   platforms = [
     new Platform({
     x: platformImage.width * 4 + 250,
     y: 270,
-    image: platformSmallTallImage
+      image: platformSmallTallImage,
+      context:c
   }),
     new Platform({
     x: -1,
     y: 470,
-    image: platformImage
+      image: platformImage,
+      context:c
   }),
   new Platform({
     x: platformImage.width - 1,
     y: 470,
-    image: platformImage
+    image: platformImage,
+    context:c
   }),
   new Platform({
     x: platformImage.width * 2 + 100,
     y: 470,
-    image: platformImage
+    image: platformImage,
+    context:c
   }),
     new Platform({
     x: platformImage.width * 3,
     y: 470,
-    image: platformImage
+      image: platformImage,
+      context:c
     }),
   new Platform({
     x: platformImage.width * 4,
     y: 470,
-    image: platformImage
+    image: platformImage,
+    context:c
   }),
   new Platform({
     x: platformImage.width * 5 + 600,
     y: 470,
-    image: platformImage
+    image: platformImage,
+    context:c
   })
   ]
 
@@ -214,12 +105,14 @@ genericObject = [
   new GenericObject({
     x: 0,
     y: 0,
-    image: createImage(background)
+    image: createImage(background),
+    context:c
   }),
   new GenericObject({
     x: 0,
     y: 0,
-    image: createImage(hills)
+    image: createImage(hills),
+    context:c
   })
 ]
 scrollPlatform = 0
@@ -229,6 +122,7 @@ function animate() {
   requestAnimationFrame(animate)
   c.fillStyle = 'white'
   c.fillRect(0, 0, canvas.width, canvas.height)
+
 
   genericObject.forEach(genericObject => {
     genericObject.draw()
@@ -280,6 +174,7 @@ function animate() {
     }
   })
 
+
   // sprite switch //
   if (keys.up.pressed) {
      player.frames = 1;
@@ -315,6 +210,13 @@ function animate() {
     player.currentSprite = player.sprites.stand.right
     player.currentCropWidth = player.sprites.stand.cropWidth
   }
+
+  if (player.position.x > 200 && !messageShown) {
+    dialogueBubble.showMessage("Hello there! I'm Anastasia. Welcome to my game!");
+    messageShown = true;
+  }
+
+  dialogueBubble.draw(); // draw the message bubble
 
 // win condition //
   if (scrollPlatform > platformImage.width * 5 + 300) {
@@ -354,7 +256,7 @@ addEventListener('keydown', ({key}) => {
       if (player.jumpCount < 2) {
         player.jumpCount++;
         keys.up.pressed = true
-        player.velocity.y -= 20
+        player.velocity.y -= 18
         break
       }
     
