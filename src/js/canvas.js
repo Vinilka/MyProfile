@@ -19,7 +19,7 @@ canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 
 
-const gravity = 1
+const gravity = 1.1
 
 let platformImage = createImage(platform)
 let platformSmallTallImage = createImage(platformSmallTall)
@@ -45,7 +45,7 @@ const keys = {
 let scrollPlatform = 0
   
 // Create an instance of MessageBubble
-let dialogueBubble = new DialogueBubble(dialogueBoxRight, 100, 100, c);
+let dialogueBubble = new DialogueBubble(dialogueBoxRight, 200, 60, c);
 let messageShown = false;
 
 
@@ -128,6 +128,8 @@ function animate() {
     genericObject.draw()
   })
   
+  dialogueBubble.draw(); // draw the message bubble
+
   platforms.forEach(platform => {
     platform.draw()
   })
@@ -216,7 +218,7 @@ function animate() {
     messageShown = true;
   }
 
-  dialogueBubble.draw(); // draw the message bubble
+
 
 // win condition //
   if (scrollPlatform > platformImage.width * 5 + 300) {

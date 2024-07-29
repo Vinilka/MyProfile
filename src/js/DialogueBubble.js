@@ -4,8 +4,10 @@ export class DialogueBubble {
   constructor(imageSrc, x, y, context) {
     this.context = context;
     this.image = createImage(imageSrc);
-    this.x = x;
-    this.y = y;
+    this.position = {
+      x,
+      y
+    };
     this.width = 280;
     this.height = 180;
     this.padding = 10;
@@ -32,13 +34,13 @@ export class DialogueBubble {
 
   draw() {
     if (this.messageVisible) {
-      this.context.drawImage(this.image, this.x, this.y, this.width, this.height);
+      this.context.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
       this.context.fillStyle = "#1d6c7a";
       this.context.font = "18px PatrickHand";
       this.wrapText(
         this.messageText.slice(0, this.messageIndex),
-        this.x + this.horizontalPadding,
-        this.y + this.padding,
+        this.position.x + this.horizontalPadding,
+        this.position.y + this.padding,
         this.width - this.horizontalPadding * 2,
         20
       );

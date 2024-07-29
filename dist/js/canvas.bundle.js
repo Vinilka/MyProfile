@@ -253,8 +253,10 @@ var DialogueBubble = /*#__PURE__*/function () {
 
     this.context = context;
     this.image = Object(_createImage__WEBPACK_IMPORTED_MODULE_0__["createImage"])(imageSrc);
-    this.x = x;
-    this.y = y;
+    this.position = {
+      x: x,
+      y: y
+    };
     this.width = 280;
     this.height = 180;
     this.padding = 10;
@@ -289,10 +291,10 @@ var DialogueBubble = /*#__PURE__*/function () {
     key: "draw",
     value: function draw() {
       if (this.messageVisible) {
-        this.context.drawImage(this.image, this.x, this.y, this.width, this.height);
+        this.context.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
         this.context.fillStyle = "#1d6c7a";
         this.context.font = "18px PatrickHand";
-        this.wrapText(this.messageText.slice(0, this.messageIndex), this.x + this.horizontalPadding, this.y + this.padding, this.width - this.horizontalPadding * 2, 20);
+        this.wrapText(this.messageText.slice(0, this.messageIndex), this.position.x + this.horizontalPadding, this.position.y + this.padding, this.width - this.horizontalPadding * 2, 20);
       }
     }
   }, {
@@ -577,7 +579,7 @@ var c = canvas.getContext('2d'); //canvas.width = 1024
 
 canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
-var gravity = 1;
+var gravity = 1.1;
 var platformImage = Object(_createImage__WEBPACK_IMPORTED_MODULE_4__["createImage"])(_img_platform_png__WEBPACK_IMPORTED_MODULE_5__["default"]);
 var platformSmallTallImage = Object(_createImage__WEBPACK_IMPORTED_MODULE_4__["createImage"])(_img_platformSmallTall_png__WEBPACK_IMPORTED_MODULE_8__["default"]);
 var player = new _Player__WEBPACK_IMPORTED_MODULE_0__["Player"]({
@@ -601,7 +603,7 @@ var keys = {
 };
 var scrollPlatform = 0; // Create an instance of MessageBubble
 
-var dialogueBubble = new _DialogueBubble__WEBPACK_IMPORTED_MODULE_1__["DialogueBubble"](_img_dialogueBoxRight_png__WEBPACK_IMPORTED_MODULE_9__["default"], 100, 100, c);
+var dialogueBubble = new _DialogueBubble__WEBPACK_IMPORTED_MODULE_1__["DialogueBubble"](_img_dialogueBoxRight_png__WEBPACK_IMPORTED_MODULE_9__["default"], 200, 60, c);
 var messageShown = false; // function after dying//
 
 function init() {
@@ -668,6 +670,8 @@ function animate() {
   genericObject.forEach(function (genericObject) {
     genericObject.draw();
   });
+  dialogueBubble.draw(); // draw the message bubble
+
   platforms.forEach(function (platform) {
     platform.draw();
   });
@@ -739,10 +743,8 @@ function animate() {
   if (player.position.x > 200 && !messageShown) {
     dialogueBubble.showMessage("Hello there! I'm Anastasia. Welcome to my game!");
     messageShown = true;
-  }
+  } // win condition //
 
-  dialogueBubble.draw(); // draw the message bubble
-  // win condition //
 
   if (scrollPlatform > platformImage.width * 5 + 300) {
     console.log('you win');
