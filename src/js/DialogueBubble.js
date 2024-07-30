@@ -16,13 +16,18 @@ export class DialogueBubble {
     this.messageIndex = 0;
     this.messageVisible = false;
     this.typingSpeed = 50;
+
+    this.scale = 0;
+    this.scaleIncrement = 0.03;
+    this.textStartDelay = 1000;
   }
 
   showMessage(text) {
     this.messageText = text;
     this.messageIndex = 0;
     this.messageVisible = true;
-    this.typeMessage();
+    setTimeout(() => this.typeMessage(), this.textStartDelay);
+
   }
 
   typeMessage() {
@@ -34,7 +39,17 @@ export class DialogueBubble {
 
   draw() {
     if (this.messageVisible) {
+      if (this.scale < 1) {
+        this.scale += this.scaleIncrement;
+      }
+
+      this.context.save();
+      this.context.translate(this.position.x + this.width / 2, this.position.y + this.height / 2);
+      this.context.scale(this.scale, this.scale);
+      this.context.translate(-(this.position.x + this.width / 2), -(this.position.y + this.height / 2));
       this.context.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+      this.context.restore();
+
       this.context.fillStyle = "#1d6c7a";
       this.context.font = "18px PatrickHand";
       this.wrapText(
@@ -75,5 +90,9 @@ export class DialogueBubble {
       this.context.fillText(lines[i], x, offsetY);
       offsetY += lineHeight;
     }
+  }
+
+  isVisible() {
+    return this.messageVisible;
   }
 }

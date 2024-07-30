@@ -265,25 +265,32 @@ var DialogueBubble = /*#__PURE__*/function () {
     this.messageIndex = 0;
     this.messageVisible = false;
     this.typingSpeed = 50;
+    this.scale = 0;
+    this.scaleIncrement = 0.03;
+    this.textStartDelay = 1000;
   }
 
   _createClass(DialogueBubble, [{
     key: "showMessage",
     value: function showMessage(text) {
+      var _this = this;
+
       this.messageText = text;
       this.messageIndex = 0;
       this.messageVisible = true;
-      this.typeMessage();
+      setTimeout(function () {
+        return _this.typeMessage();
+      }, this.textStartDelay);
     }
   }, {
     key: "typeMessage",
     value: function typeMessage() {
-      var _this = this;
+      var _this2 = this;
 
       if (this.messageIndex < this.messageText.length) {
         this.messageIndex++;
         setTimeout(function () {
-          return _this.typeMessage();
+          return _this2.typeMessage();
         }, this.typingSpeed);
       }
     }
@@ -291,7 +298,16 @@ var DialogueBubble = /*#__PURE__*/function () {
     key: "draw",
     value: function draw() {
       if (this.messageVisible) {
+        if (this.scale < 1) {
+          this.scale += this.scaleIncrement;
+        }
+
+        this.context.save();
+        this.context.translate(this.position.x + this.width / 2, this.position.y + this.height / 2);
+        this.context.scale(this.scale, this.scale);
+        this.context.translate(-(this.position.x + this.width / 2), -(this.position.y + this.height / 2));
         this.context.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+        this.context.restore();
         this.context.fillStyle = "#1d6c7a";
         this.context.font = "18px PatrickHand";
         this.wrapText(this.messageText.slice(0, this.messageIndex), this.position.x + this.horizontalPadding, this.position.y + this.padding, this.width - this.horizontalPadding * 2, 20);
@@ -329,9 +345,82 @@ var DialogueBubble = /*#__PURE__*/function () {
         offsetY += lineHeight;
       }
     }
+  }, {
+    key: "isVisible",
+    value: function isVisible() {
+      return this.messageVisible;
+    }
   }]);
 
   return DialogueBubble;
+}();
+
+/***/ }),
+
+/***/ "./src/js/DialogueManager.js":
+/*!***********************************!*\
+  !*** ./src/js/DialogueManager.js ***!
+  \***********************************/
+/*! exports provided: DialogueManager */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DialogueManager", function() { return DialogueManager; });
+/* harmony import */ var _DialogueBubble__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./DialogueBubble */ "./src/js/DialogueBubble.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+var DialogueManager = /*#__PURE__*/function () {
+  function DialogueManager(context) {
+    _classCallCheck(this, DialogueManager);
+
+    this.context = context;
+    this.dialogues = [];
+  }
+
+  _createClass(DialogueManager, [{
+    key: "addDialogue",
+    value: function addDialogue(imageSrc, x, y, text) {
+      var dialogueBubble = new _DialogueBubble__WEBPACK_IMPORTED_MODULE_0__["DialogueBubble"](imageSrc, x, y, this.context);
+      this.dialogues.push({
+        bubble: dialogueBubble,
+        text: text,
+        shown: false
+      });
+    }
+  }, {
+    key: "showDialogue",
+    value: function showDialogue(index) {
+      if (index < this.dialogues.length && !this.dialogues[index].shown) {
+        this.dialogues[index].bubble.showMessage(this.dialogues[index].text);
+        this.dialogues[index].shown = true;
+      }
+    }
+  }, {
+    key: "updatePositions",
+    value: function updatePositions(offset) {
+      this.dialogues.forEach(function (dialogue) {
+        dialogue.bubble.position.x += offset.x;
+        dialogue.bubble.position.y += offset.y;
+      });
+    }
+  }, {
+    key: "draw",
+    value: function draw() {
+      this.dialogues.forEach(function (dialogue) {
+        if (dialogue.shown) {
+          dialogue.bubble.draw();
+        }
+      });
+    }
+  }]);
+
+  return DialogueManager;
 }();
 
 /***/ }),
@@ -530,11 +619,10 @@ var Player = /*#__PURE__*/function () {
       this.draw();
       this.position.x += this.velocity.x;
       this.position.y += this.velocity.y;
+      ;
 
       if (this.position.y + this.height + this.velocity.y <= this.canvas.height) {
         this.velocity.y += this.gravity;
-      } else {
-        this.velocity.y = 0;
       }
     }
   }]);
@@ -554,7 +642,7 @@ var Player = /*#__PURE__*/function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Player__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Player */ "./src/js/Player.js");
-/* harmony import */ var _DialogueBubble__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DialogueBubble */ "./src/js/DialogueBubble.js");
+/* harmony import */ var _DialogueManager__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DialogueManager */ "./src/js/DialogueManager.js");
 /* harmony import */ var _Platform__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Platform */ "./src/js/Platform.js");
 /* harmony import */ var _GenericObject__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./GenericObject */ "./src/js/GenericObject.js");
 /* harmony import */ var _createImage__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./createImage */ "./src/js/createImage.js");
@@ -588,6 +676,7 @@ var player = new _Player__WEBPACK_IMPORTED_MODULE_0__["Player"]({
   gravity: gravity
 });
 var platforms = [];
+var dialogueManager = new _DialogueManager__WEBPACK_IMPORTED_MODULE_1__["DialogueManager"](c);
 var genericObject = [];
 var lastKey;
 var keys = {
@@ -601,10 +690,7 @@ var keys = {
     pressed: false
   }
 };
-var scrollPlatform = 0; // Create an instance of MessageBubble
-
-var dialogueBubble = new _DialogueBubble__WEBPACK_IMPORTED_MODULE_1__["DialogueBubble"](_img_dialogueBoxRight_png__WEBPACK_IMPORTED_MODULE_9__["default"], 200, 60, c);
-var messageShown = false; // function after dying//
+var scrollPlatform = 0; // function after dying//
 
 function init() {
   platformImage = Object(_createImage__WEBPACK_IMPORTED_MODULE_4__["createImage"])(_img_platform_png__WEBPACK_IMPORTED_MODULE_5__["default"]);
@@ -619,17 +705,17 @@ function init() {
     image: platformSmallTallImage,
     context: c
   }), new _Platform__WEBPACK_IMPORTED_MODULE_2__["Platform"]({
-    x: -1,
+    x: 0,
     y: 470,
     image: platformImage,
     context: c
   }), new _Platform__WEBPACK_IMPORTED_MODULE_2__["Platform"]({
-    x: platformImage.width - 1,
+    x: platformImage.width,
     y: 470,
     image: platformImage,
     context: c
   }), new _Platform__WEBPACK_IMPORTED_MODULE_2__["Platform"]({
-    x: platformImage.width * 2 + 100,
+    x: platformImage.width * 2,
     y: 470,
     image: platformImage,
     context: c
@@ -660,6 +746,8 @@ function init() {
     image: Object(_createImage__WEBPACK_IMPORTED_MODULE_4__["createImage"])(_img_hills_png__WEBPACK_IMPORTED_MODULE_6__["default"]),
     context: c
   })];
+  dialogueManager.addDialogue(_img_dialogueBoxRight_png__WEBPACK_IMPORTED_MODULE_9__["default"], 750, 60, "Hello there! I'm Anastasia. Welcome to my game!");
+  dialogueManager.addDialogue(_img_dialogueBoxRight_png__WEBPACK_IMPORTED_MODULE_9__["default"], 1050, 60, "I am passion about programming and good looking designs");
   scrollPlatform = 0;
 }
 
@@ -670,7 +758,7 @@ function animate() {
   genericObject.forEach(function (genericObject) {
     genericObject.draw();
   });
-  dialogueBubble.draw(); // draw the message bubble
+  dialogueManager.draw(); // draw the message bubble
 
   platforms.forEach(function (platform) {
     platform.draw();
@@ -693,6 +781,10 @@ function animate() {
       genericObject.forEach(function (genericObject) {
         genericObject.position.x -= player.speed * .66;
       });
+      dialogueManager.updatePositions({
+        x: -player.speed * 0.66,
+        y: 0
+      });
     } else if (keys.left.pressed && scrollPlatform > 0) {
       scrollPlatform -= player.speed;
       platforms.forEach(function (platform) {
@@ -700,6 +792,10 @@ function animate() {
       });
       genericObject.forEach(function (genericObject) {
         genericObject.position.x += player.speed * .66;
+      });
+      dialogueManager.updatePositions({
+        x: player.speed * 0.66,
+        y: 0
       });
     }
   } // platfrom collision //
@@ -710,7 +806,16 @@ function animate() {
       player.velocity.y = 0;
       player.jumpCount = 0;
     }
-  }); // sprite switch //
+  }); // Check if player reaches the dialogue trigger points
+
+  if (player.position.x > 200 && !dialogueManager.dialogues[0].shown) {
+    dialogueManager.showDialogue(0); // Show the first dialogue bubble
+  }
+
+  if (player.position.x > 600 && !dialogueManager.dialogues[1].shown) {
+    dialogueManager.showDialogue(1); // Show the second dialogue bubble
+  } // sprite switch //
+
 
   if (keys.up.pressed) {
     player.frames = 1;
@@ -751,7 +856,7 @@ function animate() {
   } // lose condition //
 
 
-  if (player.position.y > canvas.width) {
+  if (player.position.y > canvas.height) {
     init();
   }
 }

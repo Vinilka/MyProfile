@@ -1,5 +1,5 @@
 import { Player } from './Player';
-import { DialogueBubble } from './DialogueBubble';
+import { DialogueManager } from './DialogueManager'; 
 import { Platform } from './Platform';
 import { GenericObject } from './GenericObject';
 import { createImage } from './createImage';
@@ -27,6 +27,8 @@ let platformSmallTallImage = createImage(platformSmallTall)
 let player = new Player({ canvas,context: c, gravity })
 let platforms = []
 
+let dialogueManager = new DialogueManager(c); 
+
 let genericObject = []
 
 let lastKey
@@ -40,19 +42,19 @@ const keys = {
   up: {
     pressed: false
   }
+  
 }
+
 
 let scrollPlatform = 0
   
-// Create an instance of MessageBubble
-let dialogueBubble = new DialogueBubble(dialogueBoxRight, 200, 60, c);
-let messageShown = false;
 
 
 // function after dying//
 function init() {
 
   platformImage = createImage(platform)
+
   
   player = new Player({ canvas, context: c, gravity })
   platforms = [
@@ -63,19 +65,19 @@ function init() {
       context:c
   }),
     new Platform({
-    x: -1,
+    x: 0,
     y: 470,
       image: platformImage,
       context:c
   }),
   new Platform({
-    x: platformImage.width - 1,
+    x: platformImage.width,
     y: 470,
     image: platformImage,
     context:c
   }),
   new Platform({
-    x: platformImage.width * 2 + 100,
+    x: platformImage.width * 2,
     y: 470,
     image: platformImage,
     context:c
@@ -114,7 +116,12 @@ genericObject = [
     image: createImage(hills),
     context:c
   })
-]
+  ]
+  
+  dialogueManager.addDialogue(dialogueBoxRight, 750, 60, "Hello there! I'm Anastasia. Welcome to my game!");
+
+  dialogueManager.addDialogue(dialogueBoxRight, 1050, 60, "I am passion about programming and good looking designs");
+  
 scrollPlatform = 0
 }
 
@@ -128,7 +135,7 @@ function animate() {
     genericObject.draw()
   })
   
-  dialogueBubble.draw(); // draw the message bubble
+  dialogueManager.draw(); // draw the message bubble
 
   platforms.forEach(platform => {
     platform.draw()
@@ -153,6 +160,7 @@ function animate() {
       genericObject.forEach(genericObject => {
       genericObject.position.x -= player.speed * .66
       })
+      dialogueManager.updatePositions({ x: -player.speed * 0.66, y: 0 });
     } else if (keys.left.pressed && scrollPlatform > 0) {
       scrollPlatform -= player.speed
       platforms.forEach(platform => {
@@ -160,7 +168,8 @@ function animate() {
       })
       genericObject.forEach(genericObject => {
         genericObject.position.x += player.speed * .66
-        })
+      })
+      dialogueManager.updatePositions({ x: player.speed * 0.66, y: 0 }); 
     }
   }
 
@@ -176,6 +185,13 @@ function animate() {
     }
   })
 
+  // Check if player reaches the dialogue trigger points
+  if (player.position.x > 200 && !dialogueManager.dialogues[0].shown) {
+    dialogueManager.showDialogue(0); // Show the first dialogue bubble
+  }
+  if (player.position.x > 600 && !dialogueManager.dialogues[1].shown) {
+    dialogueManager.showDialogue(1); // Show the second dialogue bubble
+  }
 
   // sprite switch //
   if (keys.up.pressed) {
@@ -220,13 +236,14 @@ function animate() {
 
 
 
+
 // win condition //
   if (scrollPlatform > platformImage.width * 5 + 300) {
     console.log('you win')
   }
   
 // lose condition //
-  if (player.position.y > canvas.width) {
+  if (player.position.y > canvas.height) {
     init()
   }
 }
