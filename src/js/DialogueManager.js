@@ -18,6 +18,15 @@ export class DialogueManager {
     }
   }
 
+  resetDialogues() {
+    this.dialogues.forEach(dialogue => {
+      dialogue.shown = false;
+      dialogue.bubble.messageVisible = false;
+      dialogue.bubble.messageIndex = 0;
+      dialogue.bubble.scale = 0;
+    });
+  }
+
   updatePositions(offset) {
     this.dialogues.forEach(dialogue => {
       dialogue.bubble.position.x += offset.x;

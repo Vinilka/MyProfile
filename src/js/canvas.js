@@ -24,11 +24,9 @@ const gravity = 1.1
 let platformImage = createImage(platform)
 let platformSmallTallImage = createImage(platformSmallTall)
   
-let player = new Player({ canvas,context: c, gravity })
+let player;
 let platforms = []
-
-let dialogueManager = new DialogueManager(c); 
-
+let dialogueManager;
 let genericObject = []
 
 let lastKey
@@ -55,7 +53,6 @@ function init() {
 
   platformImage = createImage(platform)
 
-  
   player = new Player({ canvas, context: c, gravity })
   platforms = [
     new Platform({
@@ -118,9 +115,13 @@ genericObject = [
   })
   ]
   
-  dialogueManager.addDialogue(dialogueBoxRight, 750, 60, "Hello there! I'm Anastasia. Welcome to my game!");
-
-  dialogueManager.addDialogue(dialogueBoxRight, 1050, 60, "I am passion about programming and good looking designs");
+  if (!dialogueManager) {
+    dialogueManager = new DialogueManager(c);
+    dialogueManager.addDialogue(dialogueBoxRight, 750, 60, "Hello there! I'm Anastasia. Welcome to my game!");
+    dialogueManager.addDialogue(dialogueBoxRight, 1050, 60, "I am passionate about programming and good looking designs");
+  } else {
+    dialogueManager.resetDialogues();
+  }
   
 scrollPlatform = 0
 }
@@ -229,10 +230,6 @@ function animate() {
     player.currentCropWidth = player.sprites.stand.cropWidth
   }
 
-  if (player.position.x > 200 && !messageShown) {
-    dialogueBubble.showMessage("Hello there! I'm Anastasia. Welcome to my game!");
-    messageShown = true;
-  }
 
 
 
